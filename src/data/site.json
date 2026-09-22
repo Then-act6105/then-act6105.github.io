@@ -1,0 +1,36 @@
+{
+  "siteName": "Un Grand P'tit Tour",
+  "siteTagline": "le mag — lieux insolites & patrimoine français",
+  "siteUrl": "https://ungrandptittour.github.io",
+  "instagramHandle": "@un_grand_ptit_tour",
+  "instagramUrl": "https://www.instagram.com/un_grand_ptit_tour",
+  "facebookUrl": "https://www.facebook.com/Ungrandptit-tour",
+  "logoPath": "/assets/img/logo.jpg",
+  "themes": {
+    "patrimoine": { "label": "Patrimoine & architecture", "varName": "forest" },
+    "spirituel":  { "label": "Chemins spirituels", "varName": "ochre" },
+    "insolite":   { "label": "Insolite & extraordinaire", "varName": "trail" },
+    "nature":     { "label": "Nature & paysages", "varName": "water" }
+  },
+  "regions": {
+    "occitanie": "Occitanie",
+    "aura": "Auvergne-Rhône-Alpes",
+    "naquitaine": "Nouvelle-Aquitaine",
+    "a_confirmer": "Lieu à confirmer"
+  },
+  "themeIcons": {
+    "patrimoine": "<path d=\"M5 20V11a7 7 0 0 1 14 0v9\"/><path d=\"M5 20h14\"/><path d=\"M9 20v-6h6v6\"/>",
+    "spirituel":  "<path d=\"M4 16a8 8 0 0 1 16 0\"/><path d=\"M12 16V8\"/><path d=\"M8.2 16 9 9.3M15.8 16 15 9.3M5.4 16 7 10M18.6 16 17 10\"/><path d=\"M4 16h16\"/>",
+    "insolite":   "<path d=\"M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.6 2.6M15.4 15.4 18 18M18 6l-2.6 2.6M8.6 15.4 6 18\"/>",
+    "nature":     "<path d=\"M3 18 9 8l4 6 2-3 6 7Z\"/>"
+  },
+  "itinerary": {
+    "paceHoursPerDay": { "detendu": 4, "standard": 6, "intensif": 8 },
+    "paceLabels": { "detendu": "Détendu (4h/jour)", "standard": "Standard (6h/jour)", "intensif": "Intensif (8h/jour)" },
+    "avgSpeedKmh": 55,
+    "roadDetourFactor": 1.3,
+    "maxStopsPerDay": 4,
+    "defaultVisitDurationMin": 60,
+    "maxDaysRequestable": 14
+  }
+}

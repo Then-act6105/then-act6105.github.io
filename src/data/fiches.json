@@ -1,0 +1,31 @@
+[
+  {
+    "id": "maison-couleur-du-temps",
+    "title": "La Maison Couleur du Temps",
+    "summary": "Une grange ordinaire devenue, fresque après fresque, l'œuvre d'une vie entière.",
+    "themes": ["insolite"],
+    "region": "aura",
+    "status": "verifie",
+    "coords": { "lon": 2.765, "lat": 46.4775 },
+    "visitDurationMin": 75,
+    "image": "/assets/img/fiches/maison-couleur-du-temps-hero.jpg",
+    "imageCredit": "@un_grand_ptit_tour",
+    "gallery": [
+      { "src": "/assets/img/fiches/maison-couleur-du-temps-pinceaux.jpg", "caption": "L'atelier du peintre Chop, entre pinceaux et pots de couleur." }
+    ],
+    "body": [
+      "Dans le hameau du Petit-Clémagnet, à Vénas (Allier), une grange ordinaire est devenue, fresque après fresque, l'œuvre d'une vie entière. Depuis mai 1970, le peintre Chop habite littéralement à l'intérieur de son tableau : façades, plafonds, volets, meubles — rien n'a été laissé nu. Des visages se fondent dans des branches, des chats aux yeux d'or scrutent les visiteurs depuis les pignons, des hommes-papillons ouvrent leurs ailes de flammes sur le bois des charpentes.",
+      "Le fil conducteur de l'œuvre tient en une idée simple et vertigineuse : représenter le temps qui passe à travers les quatre saisons et les quatre âges de la vie. Une horloge géante, peinte à l'aplomb du pignon, laisse voir dans son cadran une nébuleuse cosmique et le profil poudré d'un personnage d'un autre siècle — comme si l'heure elle-même contenait toute l'histoire humaine.",
+      "La visite est souvent commentée par l'artiste lui-même, qui fait découvrir son univers en personne. Lieu artistique indépendant, généralement ouvert du printemps à l'automne (quotidien en été, dimanches et jours fériés en basse saison) — mieux vaut vérifier les horaires auprès de l'office de tourisme local avant de prendre la route."
+    ],
+    "practical": {
+      "lieu": "Hameau du Petit-Clémagnet, 03190 Vénas, Allier (Auvergne-Rhône-Alpes)",
+      "artiste": "Chop, installé sur place depuis mai 1970",
+      "visite": "Souvent commentée par l'artiste lui-même",
+      "periode": "Printemps à automne — quotidien en été, dimanches et jours fériés en basse saison"
+    },
+    "sources": [
+      { "label": "Allier Auvergne Tourisme — La Maison Couleur du Temps", "url": "https://www.allier-auvergne-tourisme.com/patrimoine-culturel/venas/la-maison-couleur-du-temps/872298" }
+    ]
+  }
+]

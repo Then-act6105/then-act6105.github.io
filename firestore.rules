@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Remplace par ton/tes email(s) de rédaction — les mêmes que dans
+    // window.UGPT_ADMIN_EMAILS (assets/js/firebase-init.js). C'est cette
+    // liste qui donne accès à la modération et au bouton d'arrêt d'urgence.
+    function isAdmin() {
+      return request.auth != null &&
+             request.auth.token.email in ['REMPLACE_MOI@exemple.fr'];
+    }
+
+    // site/status — bannière + bouton d'arrêt d'urgence.
+    // Lecture publique (la bannière doit s'afficher pour tout le monde),
+    // écriture réservée à la rédaction.
+    match /site/status {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // votes/{ficheId}_{uid} — un document par (fiche, visiteur anonyme).
+    // Lecture publique (compteurs affichés partout). Un visiteur ne peut
+    // créer ou supprimer que SON PROPRE vote.
+    match /votes/{voteId} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && voteId == request.resource.data.ficheId + '_' + request.auth.uid;
+      allow delete: if request.auth != null
+                    && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // comments/{id} — commentaires modérés. Tout le monde peut proposer
+    // un commentaire (toujours créé "pending"). Seuls les commentaires
+    // "approved" sont lisibles publiquement ; la rédaction voit tout et
+    // peut approuver / supprimer depuis /bord/.
+    match /comments/{id} {
+      allow read: if resource.data.status == 'approved' || isAdmin();
+      allow create: if request.resource.data.status == 'pending'
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() > 0
+                    && request.resource.data.text.size() < 1000
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.name.size() < 80;
+      allow update, delete: if isAdmin();
+    }
+
+    // suggestions/{id} — propositions de lieux envoyées via /contribuer/.
+    // Écriture publique, lecture réservée à la rédaction (peut contenir
+    // un email de contact).
+    match /suggestions/{id} {
+      allow create: if request.resource.data.status == 'nouvelle'
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.desc is string
+                    && request.resource.data.desc.size() > 0;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // newsletter/{email} — inscriptions. Écriture publique (un visiteur
+    // ne peut créer que son propre document), lecture réservée à la
+    // rédaction.
+    match /newsletter/{id} {
+      allow create: if request.resource.data.email is string
+                    && request.resource.data.email.size() > 3;
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // itinerary_requests/{id} — demandes d'itinéraire générées côté
+    // client (algorithme déterministe, jamais d'IA en direct — voir
+    // itinerary-engine.js). Toujours créées avec status "brouillon_auto".
+    // Lecture : la rédaction voit tout ; un visiteur ne peut relire QUE
+    // sa propre demande (même uid anonyme que celui qui l'a créée), via
+    // le lien /mon-itineraire/?id=... reçu après génération.
+    // Écriture après création : réservée à la rédaction (validation,
+    // édition manuelle du plan, rejet) depuis /bord/.
+    match /itinerary_requests/{id} {
+      allow create: if request.resource.data.status == 'brouillon_auto'
+                    && request.resource.data.plan is map
+                    && request.resource.data.params is map
+                    && (!('placeRequest' in request.resource.data)
+                        || request.resource.data.placeRequest == null
+                        || (request.resource.data.placeRequest is string
+                            && request.resource.data.placeRequest.size() < 300));
+      allow read: if isAdmin()
+                  || (request.auth != null && resource.data.uid == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+  }
+}
