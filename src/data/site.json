@@ -7,16 +7,64 @@
   "facebookUrl": "https://www.facebook.com/Ungrandptit-tour",
   "logoPath": "/assets/img/logo.jpg",
   "themes": {
-    "patrimoine": { "label": "Patrimoine & architecture", "varName": "forest" },
-    "spirituel":  { "label": "Chemins spirituels", "varName": "ochre" },
-    "insolite":   { "label": "Insolite & extraordinaire", "varName": "trail" },
-    "nature":     { "label": "Nature & paysages", "varName": "water" }
+    "patrimoine": {
+      "label": "Patrimoine & architecture", "varName": "forest",
+      "sub": {
+        "chateaux": "Châteaux & demeures historiques",
+        "villages": "Villages de caractère",
+        "religieux": "Architecture religieuse",
+        "industriel": "Vestiges industriels & patrimoine ouvrier",
+        "ouvrages": "Ponts, canaux & ouvrages d'art"
+      }
+    },
+    "spirituel": {
+      "label": "Chemins spirituels", "varName": "ochre",
+      "sub": {
+        "pelerinage": "Sanctuaires & lieux de pèlerinage",
+        "abbayes": "Abbayes & monastères",
+        "chemins": "Chemins spirituels & de randonnée",
+        "megalithes": "Sites mégalithiques & sacrés"
+      }
+    },
+    "insolite": {
+      "label": "Insolite & extraordinaire", "varName": "trail",
+      "sub": {
+        "art_brut": "Art brut & environnements visionnaires",
+        "abandonne": "Lieux abandonnés & friches",
+        "curiosites": "Curiosités naturelles insolites",
+        "musees": "Musées atypiques & collections privées",
+        "architecture_etrange": "Constructions étranges & décalées"
+      }
+    },
+    "nature": {
+      "label": "Nature & paysages", "varName": "water",
+      "sub": {
+        "grottes": "Grottes & sites géologiques",
+        "arbres": "Forêts & arbres remarquables",
+        "eau": "Lacs, rivières & cascades",
+        "panoramas": "Points de vue & panoramas",
+        "reserves": "Réserves naturelles & faune sauvage"
+      }
+    }
+  },
+  "countries": {
+    "france": "France"
   },
   "regions": {
-    "occitanie": "Occitanie",
-    "aura": "Auvergne-Rhône-Alpes",
-    "naquitaine": "Nouvelle-Aquitaine",
-    "a_confirmer": "Lieu à confirmer"
+    "aura": { "label": "Auvergne-Rhône-Alpes", "country": "france" },
+    "bfc": { "label": "Bourgogne-Franche-Comté", "country": "france" },
+    "bretagne": { "label": "Bretagne", "country": "france" },
+    "cvl": { "label": "Centre-Val de Loire", "country": "france" },
+    "corse": { "label": "Corse", "country": "france" },
+    "grand_est": { "label": "Grand Est", "country": "france" },
+    "hdf": { "label": "Hauts-de-France", "country": "france" },
+    "idf": { "label": "Île-de-France", "country": "france" },
+    "normandie": { "label": "Normandie", "country": "france" },
+    "naquitaine": { "label": "Nouvelle-Aquitaine", "country": "france" },
+    "occitanie": { "label": "Occitanie", "country": "france" },
+    "pdl": { "label": "Pays de la Loire", "country": "france" },
+    "paca": { "label": "Provence-Alpes-Côte d'Azur", "country": "france" },
+    "a_confirmer": { "label": "Lieu à confirmer", "country": "france" }
   },
   "themeIcons": {
     "patrimoine": "<path d=\"M5 20V11a7 7 0 0 1 14 0v9\"/><path d=\"M5 20h14\"/><path d=\"M9 20v-6h6v6\"/>",

@@ -45,6 +45,20 @@ function copyDir(src, dest) {
 const THEME_ICONS = site.themeIcons;
 const THEMES = site.themes;
 const REGIONS = site.regions;
+const COUNTRIES = site.countries || {};
+// Le site ne montre le filtre "Pays" que lorsqu'un deuxième pays existe vraiment
+// dans les données (voir countryChipsHtml) — prêt pour l'Europe sans rien afficher
+// tant qu'il n'y a que la France.
+const MULTI_COUNTRY = Object.keys(COUNTRIES).length > 1;
+
+function regionLabel(regionKey) {
+  const r = REGIONS[regionKey];
+  return r ? r.label : regionKey;
+}
+function countryOfRegion(regionKey) {
+  const r = REGIONS[regionKey];
+  return (r && r.country) || "france";
+}
 
 function themeTag(themeKey) {
   const t = THEMES[themeKey];
@@ -52,8 +66,7 @@ function themeTag(themeKey) {
   return `<span class="tag theme-${themeKey}">${esc(t.label)}</span>`;
 }
 function regionTag(regionKey) {
-  const label = REGIONS[regionKey] || regionKey;
-  return `<span class="tag">${esc(label)}</span>`;
+  return `<span class="tag">${esc(regionLabel(regionKey))}</span>`;
 }
 function glyphSvg(themeKey) {
   const paths = THEME_ICONS[themeKey] || THEME_ICONS.patrimoine;
@@ -74,7 +87,7 @@ function absUrl(p) {
 }
 
 /* ---------------- shared partials ---------------- */
-function headHtml({ title, description, path: pagePath, ogImage }) {
+function headHtml({ title, description, path: pagePath, ogImage, extraStyles }) {
   const fullTitle = title ? `${title} — ${site.siteName}` : `${site.siteName} — ${site.siteTagline}`;
   const desc = description || site.siteTagline;
   const image = ogImage ? absUrl(ogImage) : absUrl(site.logoPath);
@@ -102,6 +115,7 @@ function headHtml({ title, description, path: pagePath, ogImage }) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/style.css">
+${(extraStyles || []).map((s) => `<link rel="stylesheet" href="${s}">`).join("\n")}
 ${themeInlineScript()}
 </head>`;
 }
@@ -215,7 +229,7 @@ function ficheCardHtml(f, opts) {
   const rankNum = opts.rank ? `<span class="rank-num">${opts.rank}</span>` : "";
   const votesHtml = `<span class="card-votes" data-vote-count="${f.id}"><svg viewBox="0 0 24 24"><path d="M12 20.5s-7.8-4.7-10.2-9.4C.4 8 1.7 4.7 4.9 3.7c2-.6 4 .1 5.3 1.8.4.5 1 .5 1.4 0 1.3-1.7 3.3-2.4 5.3-1.8 3.2 1 4.5 4.3 3.1 7.4-2.4 4.7-10.2 9.4-10.2 9.4Z"/></svg><span class="vote-num">0</span></span>`;
   const glyphInner = f.image ? `<img src="${esc(f.image)}" alt="">` : glyphSvg(f.themes[0]);
-  return `<a class="fiche-card" href="${ficheUrl(f)}" data-themes="${f.themes.join(",")}" data-region="${f.region}">
+  return `<a class="fiche-card" href="${ficheUrl(f)}" data-themes="${f.themes.join(",")}" data-region="${f.region}" data-country="${esc(countryOfRegion(f.region))}" data-sub="${esc(f.subcategory || "")}">
     ${rankNum}
     <div class="card-glyph theme-${f.themes[0]}">${glyphInner}</div>
     <div class="card-body">
@@ -246,8 +260,8 @@ function magCoverHtml(f) {
 }
 
 /* ---------------- page shell ---------------- */
-function page({ title, description, path: pagePath, ogImage, active, bodyClass, content, extraScripts, noIndex }) {
-  return `${headHtml({ title, description, path: pagePath, ogImage })}
+function page({ title, description, path: pagePath, ogImage, active, bodyClass, content, extraScripts, extraStyles, noIndex }) {
+  return `${headHtml({ title, description, path: pagePath, ogImage, extraStyles })}
 <body${bodyClass ? ` class="${bodyClass}"` : ""}>${noIndex ? "" : ""}
 <div class="app" id="app">
   ${topbarHtml()}
@@ -270,11 +284,91 @@ function footerInApp() {
 
 /* ================= pages ================= */
 
+function ficheMapJson() {
+  return JSON.stringify(
+    fiches
+      .filter((f) => f.coords)
+      .map((f) => ({
+        id: f.id,
+        title: f.title,
+        summary: f.summary,
+        coords: f.coords,
+        theme: f.themes[0],
+        region: f.region,
+        country: countryOfRegion(f.region),
+        url: ficheUrl(f),
+      }))
+  );
+}
+
+function regionChipsHtml(idAttr) {
+  const regionKeys = Object.keys(REGIONS).filter((k) => k !== "a_confirmer");
+  const chip = (key, label) => `<button type="button" class="chip${key === "tous" ? " active" : ""}" data-region="${esc(key)}">${esc(label)}</button>`;
+  return `<div class="chip-row" id="${idAttr}">
+    ${chip("tous", "Toutes les régions")}
+    ${regionKeys.map((k) => chip(k, regionLabel(k))).join("\n    ")}
+  </div>`;
+}
+
+// N'apparaît que lorsqu'un deuxième pays est réellement présent dans site.json
+// ("countries" + regions dont "country" diffère de "france") — reste invisible
+// aujourd'hui, prêt à s'activer tout seul le jour où l'Europe s'ajoute.
+function countryChipsHtml(idAttr) {
+  if (!MULTI_COUNTRY) return "";
+  const codes = Object.keys(COUNTRIES);
+  const chip = (key, label) => `<button type="button" class="chip${key === "tous" ? " active" : ""}" data-country="${esc(key)}">${esc(label)}</button>`;
+  return `<div class="eyebrow" style="padding:2px 16px 0;">Pays</div>
+  <div class="chip-row" id="${idAttr}">
+    ${chip("tous", "Tous les pays")}
+    ${codes.map((k) => chip(k, COUNTRIES[k])).join("\n    ")}
+  </div>`;
+}
+
+function mapLegendHtml() {
+  return `<div class="map-legend" id="mapLegend">
+      ${Object.keys(THEMES)
+        .map((k) => `<span><span class="dot" style="background:var(--${THEMES[k].varName})"></span>${esc(THEMES[k].label)}</span>`)
+        .join("")}
+    </div>`;
+}
+
 function buildHome() {
   const grid = fiches.map(magCoverHtml).join("\n");
-  const content = `<section class="view">
+  const content = `<section class="view home-view">
+    <div class="home-hero">
+      <img class="home-hero-logo" src="${esc(site.logoPath)}" alt="Logo ${esc(site.siteName)}">
+      <h1 class="display home-hero-title">${esc(site.siteName)}</h1>
+      <p class="home-hero-tag">${esc(site.siteTagline)}</p>
+      <p class="home-hero-intro">Des lieux insolites et du patrimoine français, repérés sur le terrain, vérifiés par la rédaction avant d'être racontés.</p>
+      <nav class="home-menu" aria-label="Navigation principale">
+        <a class="home-menu-item" href="/carte/">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>
+          Carte
+        </a>
+        <a class="home-menu-item" href="/classement/">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M8 20V10M13 20V4M18 20v-7"/><path d="M4 20h16"/></svg>
+          Classement
+        </a>
+        <a class="home-menu-item" href="/itineraire/">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 19 9 6l3 8 3-6 5 11"/></svg>
+          Itinéraire
+        </a>
+        <a class="home-menu-item" href="/contribuer/">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 20.5 4.9 17 16 5.9a1.7 1.7 0 0 1 2.4 0l.7.7a1.7 1.7 0 0 1 0 2.4L8 20l-4 .5Z"/></svg>
+          Contribuer
+        </a>
+      </nav>
+    </div>
     <div class="section-head">
-      <h1>Le magazine</h1>
+      <h2>Explorez la carte</h2>
+      <p>Filtrez par région, touchez un repère pour ouvrir la fiche du lieu.</p>
+    </div>
+    ${countryChipsHtml("mapCountryChips")}
+    ${regionChipsHtml("mapRegionChips")}
+    <div id="mapEl" class="real-map compact"></div>
+    ${mapLegendHtml()}
+    <div class="section-head">
+      <h2>Le magazine</h2>
       <p>Les lieux insolites et le patrimoine français, en couverture.</p>
     </div>
     <div class="mag-grid">${grid}</div>
@@ -295,14 +389,16 @@ function buildHome() {
     </div>
     ${newsletterHtml()}
     ${footerHtml()}
-  </section>`;
+  </section>
+  <script>window.__FICHES_MAP__ = ${ficheMapJson()};</script>`;
   return page({
     title: "",
     description: `${site.siteTagline} — carnet de route et fiches vérifiées, par ${site.instagramHandle}.`,
     path: "/",
     active: "home",
     content,
-    extraScripts: ["/assets/js/votes.js", "/assets/js/newsletter.js"],
+    extraScripts: ["/assets/js/votes.js", "/assets/js/newsletter.js", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js", "/assets/js/map.js"],
+    extraStyles: ["https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"],
   });
 }
 
@@ -311,16 +407,11 @@ function buildCarte() {
     .filter((f) => f.coords)
     .map((f) => ficheCardHtml(f))
     .join("\n");
-  const fichesJson = JSON.stringify(
-    fiches.filter((f) => f.coords).map((f) => ({ id: f.id, title: f.title, summary: f.summary, coords: f.coords, theme: f.themes[0], url: ficheUrl(f) }))
-  );
   const content = `<section class="view map-view">
+    ${countryChipsHtml("mapCountryChips")}
+    ${regionChipsHtml("mapRegionChips")}
     <div id="mapEl" class="real-map"></div>
-    <div class="map-legend" id="mapLegend">
-      ${Object.keys(THEMES)
-        .map((k) => `<span><span class="dot" style="background:var(--${THEMES[k].varName})"></span>${esc(THEMES[k].label)}</span>`)
-        .join("")}
-    </div>
+    ${mapLegendHtml()}
     <div class="section-head">
       <h1>Autour de la carte</h1>
       <p>Touchez un repère pour ouvrir la fiche du lieu.</p>
@@ -328,7 +419,7 @@ function buildCarte() {
     <div class="fiche-list">${list}</div>
     ${footerHtml()}
   </section>
-  <script>window.__FICHES_MAP__ = ${fichesJson};</script>`;
+  <script>window.__FICHES_MAP__ = ${ficheMapJson()};</script>`;
   return page({
     title: "Carte",
     description: "La carte interactive des lieux insolites et du patrimoine français.",
@@ -336,6 +427,7 @@ function buildCarte() {
     active: "carte",
     content,
     extraScripts: ["/assets/js/votes.js", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js", "/assets/js/map.js"],
+    extraStyles: ["https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"],
   });
 }
 
@@ -355,9 +447,20 @@ function buildClassement() {
     <div class="chip-row" id="themeChips">
       ${themeChips.map((k) => `<button class="chip${k === "tous" ? " active" : ""}" data-theme="${k}" type="button">${k === "tous" ? "Tous" : esc(THEMES[k].label)}</button>`).join("")}
     </div>
+    <div class="eyebrow sub-eyebrow" style="padding:2px 16px 0;" id="subEyebrow" hidden>Sous-catégorie</div>
+    ${Object.keys(THEMES)
+      .map((themeKey) => {
+        const subs = THEMES[themeKey].sub || {};
+        const subKeys = ["tous"].concat(Object.keys(subs));
+        return `<div class="chip-row sub-chip-row" id="subChips-${themeKey}" data-for-theme="${themeKey}" hidden>
+      ${subKeys.map((sk) => `<button class="chip${sk === "tous" ? " active" : ""}" data-sub="${sk}" type="button">${sk === "tous" ? "Toutes" : esc(subs[sk])}</button>`).join("")}
+    </div>`;
+      })
+      .join("\n    ")}
+    ${countryChipsHtml("countryChips")}
     <div class="eyebrow" style="padding:2px 16px 0;">Région</div>
     <div class="chip-row" id="regionChips">
-      ${regionChips.map((k) => `<button class="chip${k === "tous" ? " active" : ""}" data-region="${k}" type="button">${k === "tous" ? "Toutes" : esc(REGIONS[k])}</button>`).join("")}
+      ${regionChips.map((k) => `<button class="chip${k === "tous" ? " active" : ""}" data-region="${k}" type="button">${k === "tous" ? "Toutes" : esc(regionLabel(k))}</button>`).join("")}
     </div>
     <div class="rank-list" id="rankList">${cards}</div>
     ${footerHtml()}
@@ -560,7 +663,7 @@ function buildItineraire() {
         <div class="itin-toggle-row" id="it-regions">
           ${Object.keys(REGIONS)
             .filter((k) => k !== "a_confirmer")
-            .map((k) => `<button type="button" class="itin-toggle" data-value="${k}">${esc(REGIONS[k])}</button>`)
+            .map((k) => `<button type="button" class="itin-toggle" data-value="${k}">${esc(regionLabel(k))}</button>`)
             .join("")}
         </div>
       </div>

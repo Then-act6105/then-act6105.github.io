@@ -4,6 +4,7 @@
     "title": "La Maison Couleur du Temps",
     "summary": "Une grange ordinaire devenue, fresque après fresque, l'œuvre d'une vie entière.",
     "themes": ["insolite"],
+    "subcategory": "art_brut",
     "region": "aura",
     "status": "verifie",
     "coords": { "lon": 2.765, "lat": 46.4775 },
