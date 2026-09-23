@@ -324,6 +324,18 @@ function countryChipsHtml(idAttr) {
   </div>`;
 }
 
+// Bandeau de photos en haut de l'accueil. Piloté par site.json → "homeGallery"
+// (un tableau de {src, alt}) : Erinson peut changer les photos plus tard en
+// modifiant seulement ce tableau, sans toucher au code.
+function homeGalleryHtml() {
+  const photos = site.homeGallery || [];
+  if (!photos.length) return "";
+  const slides = photos
+    .map((p) => `<div class="home-gallery-slide"><img src="${esc(p.src)}" alt="${esc(p.alt || "")}" loading="lazy"></div>`)
+    .join("");
+  return `<div class="home-gallery" role="group" aria-label="Photos du magazine">${slides}</div>`;
+}
+
 function mapLegendHtml() {
   return `<div class="map-legend" id="mapLegend">
       ${Object.keys(THEMES)
@@ -340,6 +352,9 @@ function buildHome() {
       <h1 class="display home-hero-title">${esc(site.siteName)}</h1>
       <p class="home-hero-tag">${esc(site.siteTagline)}</p>
       <p class="home-hero-intro">Des lieux insolites et du patrimoine français, repérés sur le terrain, vérifiés par la rédaction avant d'être racontés.</p>
+    </div>
+    ${homeGalleryHtml()}
+    <div class="home-hero home-hero-menu">
       <nav class="home-menu" aria-label="Navigation principale">
         <a class="home-menu-item" href="/carte/">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>

@@ -6,6 +6,10 @@
   "instagramUrl": "https://www.instagram.com/un_grand_ptit_tour",
   "facebookUrl": "https://www.facebook.com/Ungrandptit-tour",
   "logoPath": "/assets/img/logo.jpg",
+  "homeGallery": [
+    { "src": "/assets/img/fiches/maison-couleur-du-temps-hero.jpg", "alt": "La Maison Couleur du Temps, Vénas (Allier)" },
+    { "src": "/assets/img/fiches/maison-couleur-du-temps-pinceaux.jpg", "alt": "L'atelier du peintre Chop" }
+  ],
   "themes": {
     "patrimoine": {
       "label": "Patrimoine & architecture", "varName": "forest",
